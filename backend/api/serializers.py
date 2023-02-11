@@ -49,16 +49,41 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
-        model = Ingredient
-        fields = '__all__'
+        fields = 'id', 'amount', 'name', 'measurement_unit'
+        model = IngredientAmount
+
+    def get_name(self, obj):
+        return obj.ingredient_name.name
+
+    def get_measurement_unit(self, obj):
+        return obj.ingredient_name.measurement_unit
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                'Добавьте хотя бы 1 ингредиент'
+            )
+        return value
 
 
-class RecipeReadSerializer(GetIngredientsMixin, serializers.ModelSerializer):
+class IngredientCreateSerializer(IngredientSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(),
+    )
+
+    class Meta:
+        fields = 'id', 'amount'
+        model = IngredientAmount
+
+
+class RecipeReadSerializer(serializers.ModelSerializer):
     author = UserViewSerializer()
     tags = TagSerializer(many=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientSerializer(many=True, read_only=True)
     is_favorited = serializers.BooleanField(default=False)
     is_in_shopping_list = serializers.BooleanField(default=False)
 
@@ -67,20 +92,21 @@ class RecipeReadSerializer(GetIngredientsMixin, serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RecipeCreateSerializer(GetIngredientsMixin, serializers.ModelSerializer):
+class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
     )
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientCreateSerializer(many=True)
     image = Base64ImageField()
 
     class Meta:
         model = Recipe
         fields = '__all__'
+        read_only_fields = ('author',)
 
     def validate(self, data):
-        ingredients = self.initial_data['ingredients']
+        ingredients = data['ingredients']
         ingredient_list = []
         if ingredients is None:
             raise serializers.ValidationError(

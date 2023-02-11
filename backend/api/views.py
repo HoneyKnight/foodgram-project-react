@@ -23,7 +23,7 @@ from .serializers import (CheckFavoriteSerializer, CheckShoppingCartSerializer,
                           IngredientSerializer, RecipeAddingSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           TagSerializer)
-
+from .mixins import AddAndDeleteObjectMixin
 
 User = get_user_model()
 
@@ -39,7 +39,7 @@ class IngredientViewSet(ListRetrieveViewSet):
     filter_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(AddAndDeleteObjectMixin, viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly,)
     filter_class = RecipeFilter
 
@@ -74,27 +74,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk=None):
-        data = {
-            'user': request.user.id,
-            'recipe': pk,
-        }
-        serializer = CheckFavoriteSerializer(
-            data=data, context={'request': request}
+        return self.add_object_method(
+            request=request,
+            pk=pk,
+            serializer_class=CheckFavoriteSerializer,
+            model=FavoriteRecipe
         )
-        serializer.is_valid(raise_exception=True)
-        return self.add_object(FavoriteRecipe, request.user, pk)
 
     @favorite.mapping.delete
     def del_favorite(self, request, pk=None):
-        data = {
-            'user': request.user.id,
-            'recipe': pk,
-        }
-        serializer = CheckFavoriteSerializer(
-            data=data, context={'request': request}
+        return self.delete_object_method(
+            request=request,
+            pk=pk,
+            serializer_class=CheckFavoriteSerializer,
+            model=FavoriteRecipe
         )
-        serializer.is_valid(raise_exception=True)
-        return self.delete_object(FavoriteRecipe, request.user, pk)
 
     @action(
         detail=True,
@@ -102,27 +96,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk=None):
-        data = {
-            'user': request.user.id,
-            'recipe': pk,
-        }
-        serializer = CheckShoppingCartSerializer(
-            data=data, context={'request': request}
+        return self.add_object_method(
+            request=request,
+            pk=pk,
+            serializer_class=CheckShoppingCartSerializer,
+            model=ShoppingCart
         )
-        serializer.is_valid(raise_exception=True)
-        return self.add_object(ShoppingCart, request.user, pk)
 
     @shopping_cart.mapping.delete
     def del_shopping_cart(self, request, pk=None):
-        data = {
-            'user': request.user.id,
-            'recipe': pk,
-        }
-        serializer = CheckShoppingCartSerializer(
-            data=data, context={'request': request}
+        return self.delete_object_method(
+            request=request,
+            pk=pk,
+            serializer_class=CheckShoppingCartSerializer,
+            model=ShoppingCart
         )
-        serializer.is_valid(raise_exception=True)
-        return self.delete_object(ShoppingCart, request.user, pk)
 
     @transaction.atomic()
     def add_object(self, model, user, pk):

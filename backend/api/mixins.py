@@ -24,3 +24,28 @@ class GetIngredientsMixin:
             'id', 'name', 'measurement_unit',
             amount=F('ingredients_amount__amount')
         )
+
+
+class AddAndDeleteObjectMixin:
+    def add_object_method(self, request, pk, serializer_class, model):
+        data = {
+            'user': request.user.id,
+            'recipe': pk,
+        }
+        serializer = serializer_class(
+            data=data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        return self.add_object(model, request.user, pk)
+
+    def delete_object_method(self, request, pk, serializer_class, model):
+        data = {
+            'user': request.user.id,
+            'recipe': pk,
+        }
+        serializer = serializer_class(
+            data=data, context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        return self.delete_object(model, request.user, pk)

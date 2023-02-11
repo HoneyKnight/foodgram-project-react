@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.core.validators import MinValueValidator
 
 User = get_user_model()
 
@@ -63,7 +64,11 @@ class IngredientAmount(models.Model):
         on_delete=models.CASCADE
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество ингредиентов',
+        default=1,
+        verbose_name='Количество',
+        validators=[
+            MinValueValidator(1, 'Добавьте хотя бы 1 ингредиент')
+        ]
     )
 
     class Meta:
@@ -93,7 +98,7 @@ class Recipe(models.Model):
         verbose_name='Теги',
         related_name='recipes'
     )
-    Ingredients = models.ManyToManyField(
+    ingredients = models.ManyToManyField(
         Ingredient,
         through=IngredientAmount,
         verbose_name='Ингредиенты',
@@ -148,7 +153,7 @@ class FavoriteRecipe(models.Model):
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'recipe'],
+                fields=['user', 'recipe'],
                 name='unique_favorite'),
         ]
 
@@ -157,7 +162,7 @@ class FavoriteRecipe(models.Model):
 
 
 class ShoppingCart(models.Model):
-    author = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
         related_name='cart',
