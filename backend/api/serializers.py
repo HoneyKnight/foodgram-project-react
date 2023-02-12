@@ -105,18 +105,18 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('author',)
 
-    def validate(self, data):
-        if not data.get('tags'):
+    def validate(self, obj):
+        if not obj.get('tags'):
             raise serializers.ValidationError(
                 'Нужно указать минимум 1 тег.'
             )
-        inrgedient_id_list = [item['id'] for item in data.get('ingredients')]
+        inrgedient_id_list = [item['id'] for item in obj.get('ingredients')]
         unique_ingredient_id_list = set(inrgedient_id_list)
         if len(inrgedient_id_list) != len(unique_ingredient_id_list):
             raise serializers.ValidationError(
                 'Ингредиенты не должны повторяться.'
             )
-        return data
+        return obj
 
     def add_ingredients_and_tags(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
@@ -129,20 +129,24 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = super().create(validated_data)
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user,
+            **validated_data
+        )
         self.add_ingredients_and_tags(recipe, tags, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
-        instance.ingredients.clear()
-        instance.tags.clear()
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        instance = self.add_ingredients_and_tags(
-            instance, ingredients=ingredients, tags=tags)
-        return super().update(instance, validated_data)
+        IngredientAmount.objects.filter(
+            recipe=instance,
+            ingredient__in=instance.ingredients.all()).delete()
+        self.add_ingredients_and_tags(instance, tags, ingredients)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return RecipeReadSerializer(
