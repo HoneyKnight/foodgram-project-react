@@ -105,18 +105,18 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('author',)
 
-    def validate(self, obj):
-        if not obj.get('tags'):
+    def validate(self, data):
+        if not data.get('tags'):
             raise serializers.ValidationError(
                 'Нужно указать минимум 1 тег.'
             )
-        inrgedient_id_list = [item['id'] for item in obj.get('ingredients')]
+        inrgedient_id_list = [item['id'] for item in data.get('ingredients')]
         unique_ingredient_id_list = set(inrgedient_id_list)
         if len(inrgedient_id_list) != len(unique_ingredient_id_list):
             raise serializers.ValidationError(
                 'Ингредиенты не должны повторяться.'
             )
-        return obj
+        return data
 
     def add_ingredients_and_tags(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
