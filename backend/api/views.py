@@ -16,14 +16,13 @@ from rest_framework.response import Response
 from users.models import Follow
 
 from .filters import IngredientFilter, RecipeFilter
-from .mixins import ListRetrieveViewSet
+from .mixins import AddAndDeleteObjectMixin, ListRetrieveViewSet
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (CheckFavoriteSerializer, CheckShoppingCartSerializer,
                           CheckSubscribeSerializer, FollowSerializer,
                           IngredientSerializer, RecipeAddingSerializer,
                           RecipeCreateSerializer, RecipeReadSerializer,
                           TagSerializer)
-from .mixins import AddAndDeleteObjectMixin
 
 User = get_user_model()
 
@@ -63,10 +62,6 @@ class RecipeViewSet(AddAndDeleteObjectMixin, viewsets.ModelViewSet):
                 is_favorited=Value(False, output_field=BooleanField()),
                 is_in_shopping_cart=Value(False, output_field=BooleanField())
             )
-
-    @transaction.atomic()
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
 
     @action(
         detail=True,
