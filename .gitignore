@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.isort.cfg
 # C extensions
 *.so
 .vscode/

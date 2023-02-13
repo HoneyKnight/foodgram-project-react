@@ -14,7 +14,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
-
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
