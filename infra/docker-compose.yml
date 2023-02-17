@@ -9,8 +9,8 @@ services:
       - ./.env
 
   backend:
-    # image: honeyknight/foodgram_backend:latest
-    build: ../backend
+    image: honeyknight/foodgram_backend:latest
+    # build: ../backend
     restart: always
     volumes:
       - static_value:/app/static/
@@ -21,9 +21,9 @@ services:
       - ./.env
 
   frontend:
-    # image: honeyknight/foodgram_frontend:latest
-    build: 
-      context: ../frontend
+    image: honeyknight/foodgram_frontend:latest
+    # build: 
+      # context: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
