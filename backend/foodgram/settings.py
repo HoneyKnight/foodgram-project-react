@@ -63,14 +63,23 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql_psycopg2'),
-        'NAME': os.getenv('POSTGRES_DB', default='POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER', default='DB_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='DB_password'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432')
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
+
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -137,4 +146,3 @@ DJOSER = {
 
 FILENAME = 'shopping_cart.txt'
 SHOPPING_CART = 'Cписок покупок:\n\nНазвание продукта - Кол-во/Ед.изм.\n'
-
