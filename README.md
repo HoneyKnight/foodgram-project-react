@@ -30,7 +30,3 @@ docker-compose exec backend python manage.py createsuperuser
 docker-compose exec backend python manage.py load_tags
 docker-compose exec backend python manage.py load_ingredients
 ```
-
-
-### Развернутый проект
-* Развернутый проект можно посмотреть по [ссылке](http://51.250.71.133/)
